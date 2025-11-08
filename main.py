@@ -52,6 +52,7 @@ def process(latest_version: Version):
         "^rev.*apk$",
         "bins",
         "integrations.apk",
+        include_prereleases=True
     )
 
     print(integrationsRelease["body"])
