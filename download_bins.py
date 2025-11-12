@@ -42,9 +42,13 @@ def download_apkeditor():
     print("Downloading apkeditor")
     download_release_asset("REAndroid/APKEditor", "APKEditor", "bins", "apkeditor.jar")
 
-
 def download_revanced_bins():
-    print("Downloading cli")
+    print("Downloading CLI (latest v2+)")
     download_release_asset(
-        "inotia00/revanced-cli", "^revanced-cli.*jar$", "bins", "cli.jar", version="v5.0.1"
+        "revanced/revanced-cli",
+        "^revanced-cli.*\\.jar$",
+        "bins",
+        "cli.jar",
+        include_prereleases=True
     )
+
