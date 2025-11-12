@@ -46,8 +46,7 @@ def process(latest_version: Version):
         "crimera/piko",
         "^patches.*rvp$",
         "bins",
-        "patches.rvp",
-        True
+        "patches.rvp"
     )
 
     print("Downloading integrations")
