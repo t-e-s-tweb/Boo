@@ -87,7 +87,7 @@ Changelogs:
 def main():
     # get latest version
     url: str = "https://www.apkmirror.com/apk/x-corp/twitter/"
-    repo_url: str = "crimera/twitter-apk"
+    repo_url: str = "monsivamon/twitter-apk"
 
     versions = apkmirror.get_versions(url)
 
