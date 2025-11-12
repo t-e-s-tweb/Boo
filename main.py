@@ -103,7 +103,8 @@ def main():
     )
 
     if last_build_version is None:
-        panic("Failed to fetch the latest build version")
+        print("No previous release found — assuming this is the first build.")
+        process(latest_version)
         return
 
     # Begin stuff
