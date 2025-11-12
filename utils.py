@@ -80,7 +80,6 @@ def merge_apk(path: str):
         ["java", "-jar", "./bins/apkeditor.jar", "m", "-i", path]
     ).check_returncode()
 
-
 def patch_apk(
     cli: str,
     integrations: str,
@@ -95,36 +94,34 @@ def patch_apk(
         "-jar",
         cli,
         "patch",
-        "-b",
-        patches,
-        "-m",
-        integrations,
-        # use j-hc's keystore so we wouldn't need to reinstall
-        "--keystore",
-        "ks.keystore",
-        "--keystore-entry-password",
-        "123456789",
-        "--keystore-password",
-        "123456789",
-        "--signer",
-        "jhc",
-        "--keystore-entry-alias",
-        "jhc",
     ]
 
-    if includes is not None:
-        for i in includes:
-            command.append("-i")
-            command.append(i)
+    # 拡張子で分岐するようにする
+    if patches.endswith(".rvp"):
+        command += ["--patch-bundle", patches]
+    else:
+        command += ["-b", patches]
 
-    if excludes is not None:
+    command += [
+        "--merge", integrations,   # ← v2以降は -m ではなく --merge
+        "--keystore", "ks.keystore",
+        "--keystore-entry-password", "123456789",
+        "--keystore-password", "123456789",
+        "--signer", "jhc",
+        "--keystore-entry-alias", "jhc",
+    ]
+
+    if includes:
+        for i in includes:
+            command += ["-i", i]
+    if excludes:
         for e in excludes:
-            command.append("-e")
-            command.append(e)
+            command += ["-e", e]
 
     command.append(apk)
 
     subprocess.run(command).check_returncode()
+
 
     # remove -patched from the apk to match out
     if out is not None:
