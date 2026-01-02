@@ -7,6 +7,38 @@ from download_bins import download_release_asset
 import apkmirror
 import os
 import argparse
+import subprocess
+
+
+def compress_apk_with_7z(apk_file: str) -> str:
+    """
+    Compress a single APK file with maximum 7z compression
+    Returns the compressed file path
+    """
+    compressed_file = f"{apk_file}.7z"
+    
+    cmd = [
+        "7z", "a",
+        "-t7z",
+        "-m0=lzma2",
+        "-mx=9",
+        "-mfb=64",
+        "-md=32m",
+        "-ms=on",
+        "-mmt=on",
+        compressed_file,
+        apk_file
+    ]
+    
+    print(f"Compressing {apk_file} with 7z...")
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    
+    if result.returncode != 0:
+        print(f"7z compression failed for {apk_file}: {result.stderr}")
+        return None
+    
+    print(f"Compressed to {compressed_file}")
+    return compressed_file
 
 
 def get_latest_release(versions: list[Version]) -> Version | None:
@@ -53,14 +85,32 @@ Changelogs:
 
     build_apks(latest_version)
 
+    # List of APK files to compress
+    apk_files = [
+        f"x-piko-v{latest_version.version}.apk",
+        f"x-piko-material-you-v{latest_version.version}.apk",
+        f"twitter-piko-v{latest_version.version}.apk",
+        f"twitter-piko-material-you-v{latest_version.version}.apk",
+    ]
+    
+    # Compress each APK separately
+    compressed_files = []
+    for apk_file in apk_files:
+        if os.path.exists(apk_file):
+            compressed_file = compress_apk_with_7z(apk_file)
+            if compressed_file and os.path.exists(compressed_file):
+                compressed_files.append(compressed_file)
+        else:
+            print(f"Warning: {apk_file} not found, skipping compression")
+
+    # Only upload compressed 7z files
+    if not compressed_files:
+        panic("No compressed files were created successfully")
+        return
+
     publish_release(
         latest_version.version,
-        [
-            f"x-piko-v{latest_version.version}.apk",
-            f"x-piko-material-you-v{latest_version.version}.apk",
-            f"twitter-piko-v{latest_version.version}.apk",
-            f"twitter-piko-material-you-v{latest_version.version}.apk",
-        ],
+        compressed_files,
         message,
         latest_version.version
     )
