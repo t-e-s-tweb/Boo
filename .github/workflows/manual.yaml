@@ -16,7 +16,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 10
+      - name: Boostrap Gradle Memory
+        shell: bash
+        run: |
+         wget https://raw.githubusercontent.com/PaulWoitaschek/Voice/refs/heads/main/scripts/gradle_bootstrap.sh
+         chmod +x gradle_bootstrap.sh
+         bash gradle_bootstrap.sh
       - name: Set up java
         uses: actions/setup-java@v4
         with:
