@@ -44,3 +44,11 @@ jobs:
           #wget https://github.com/kareemlukitomo/morphe-patches/releases/download/v26.4.30-d38bd3/patches-26.4.30-d38bd3.mpp
           wget https://github.com/MorpheApp/morphe-cli/releases/download/v1.8.0/morphe-cli-1.8.0-all.jar -O morphe.jar
           java -jar morphe.jar patch piko.apk -p patches.mpp --striplibs=arm64-v8a --unsigned --purge -e='Disable Twitter PairIP startup checks' --exclusive --continue-on-error -f
+      - name: Upload Android binaries to release
+        uses: svenstaro/upload-release-action@2.7.0
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./piko*
+          tag: piko
+          overwrite: true
+          file_glob: true
