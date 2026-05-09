@@ -50,9 +50,9 @@ def get_morphe_patches() -> str:
     print("Downloading Morphe patches")
     release_info = download_release_asset(
         repo="kareemlukitomo/morphe-patches",
-        regex=r"^morphe-patches.*\.rvp$",   # change to .jar if needed
+        regex=r"^patches.*mpp$",   # change to .jar if needed
         out_dir="bins",
-        filename="morphe-patches.rvp",
+        filename="morphe-patches.mpp",
         include_prereleases=False
     )
     return os.path.join("bins", "morphe-patches.rvp")
