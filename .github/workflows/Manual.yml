@@ -48,7 +48,7 @@ jobs:
         uses: svenstaro/upload-release-action@2.7.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./piko*
+          file: ./piko-patched*
           tag: piko
           overwrite: true
           file_glob: true
