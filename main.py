@@ -1,8 +1,8 @@
 from apkmirror import Version, Variant
-from build_variants import build_apks
+from build_variants import build_apks          # unchanged, from build_variants.py
 from download_bins import download_apkeditor, download_morphe_cli, download_release_asset
 import github
-from utils import panic, merge_apk, publish_release
+from utils import panic, merge_apk, publish_release, patch_apk
 import apkmirror
 import os
 import argparse
@@ -38,6 +38,57 @@ def compress_apk_with_7z(apk_file: str) -> str:
     
     print(f"Compressed to {compressed_file}")
     return compressed_file
+
+
+# ---- MORPHE REPATCH: new helpers -----------------------------------
+def get_morphe_patches() -> str:
+    """
+    Downloads the latest morphe-patches asset from kareemlukitomo/morphe-patches
+    and returns the local file path.
+    Adjust the regex if the file extension is .jar or .rvp.
+    """
+    print("Downloading Morphe patches")
+    release_info = download_release_asset(
+        repo="kareemlukitomo/morphe-patches",
+        regex=r"^morphe-patches.*\.rvp$",   # change to .jar if needed
+        out_dir="bins",
+        filename="morphe-patches.rvp",
+        include_prereleases=False
+    )
+    return os.path.join("bins", "morphe-patches.rvp")
+
+
+def add_morphe_patch(version: str) -> str | None:
+    """
+    Applies only the 'Disable Twitter PairlP startup checks' patch
+    to the already Piko-patched twitter-piko APK.
+    Returns the path of the newly created APK, or None if the base APK is missing.
+    """
+    base_apk = f"twitter-piko-v{version}.apk"
+    if not os.path.exists(base_apk):
+        print(f"Warning: {base_apk} not found, skipping morphe repatch")
+        return None
+
+    morphe_patches = os.path.join("bins", "morphe-patches.rvp")
+    cli = os.path.join("bins", "morphe-cli.jar")   # already downloaded by download_morphe_cli()
+
+    out_apk = f"twitter-piko-morphe-v{version}.apk"
+
+    print(f"Applying Morphe patch to {base_apk} ...")
+    patch_apk(
+        cli=cli,
+        patches=morphe_patches,
+        apk=base_apk,
+        includes=["Disable Twitter PairlP startup checks"],  # exact patch name
+        out=out_apk,
+        excludes=None,
+    )
+
+    if not os.path.exists(out_apk):
+        print("Error: Morphe patching failed to produce output")
+        return None
+    return out_apk
+# -------------------------------------------------------------------
 
 
 def get_latest_release(versions: list[Version]) -> Version | None:
@@ -81,17 +132,24 @@ Changelogs:
 [piko-{pikoRelease["tag_name"]}]({pikoRelease["html_url"]})
 """
 
-    build_apks(latest_version)
+    build_apks(latest_version)          # <-- original Piko patching (unchanged)
 
-    # List of APK files to compress
+    # ---- MORPHE REPATCH --------------------------------------------
+    get_morphe_patches()
+    morphe_apk = add_morphe_patch(latest_version.version)
+    if morphe_apk:
+        message += "\n**Additional patch:** Disable Twitter PairlP startup checks (Morphe)"
+    # -----------------------------------------------------------------
+
     apk_files = [
         f"x-piko-v{latest_version.version}.apk",
         f"x-piko-material-you-v{latest_version.version}.apk",
         f"twitter-piko-v{latest_version.version}.apk",
         f"twitter-piko-material-you-v{latest_version.version}.apk",
     ]
-    
-    # Compress each APK separately
+    if morphe_apk and os.path.exists(morphe_apk):
+        apk_files.append(morphe_apk)
+
     compressed_files = []
     for apk_file in apk_files:
         if os.path.exists(apk_file):
@@ -101,7 +159,6 @@ Changelogs:
         else:
             print(f"Warning: {apk_file} not found, skipping compression")
 
-    # Only upload compressed 7z files
     if not compressed_files:
         panic("No compressed files were created successfully")
         return
@@ -115,7 +172,6 @@ Changelogs:
 
 
 def main():
-    # get latest version
     url: str = "https://www.apkmirror.com/apk/x-corp/twitter/"
     repo_url: str = "lluni/twitter-apk"
 
@@ -125,7 +181,6 @@ def main():
     if latest_version is None:
         raise Exception("Could not find the latest version")
 
-    # only continue if it's a release
     if latest_version.version.find("release") < 0:
         panic("Latest version is not a release version")
 
@@ -137,7 +192,6 @@ def main():
         panic("Failed to fetch the latest build version")
         return
 
-    # Begin stuff
     if last_build_version.tag_name != latest_version.version:
         print(f"New version found: {latest_version.version}")
     else:
@@ -155,16 +209,15 @@ def manual(version:str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Piko APK')
-    # 0 = auto; 1 = manual;
     parser.add_argument('--m', action="store", dest='mode', default=0)
     parser.add_argument('--v', action="store", dest='version', default=0)
 
     args = parser.parse_args()
     mode = args.mode
 
-    if not mode: # auto
+    if not mode:
         main()
-    else: # manual
+    else:
         version = args.version
         if not version:
             raise Exception("Version is required.")
