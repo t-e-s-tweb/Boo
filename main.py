@@ -55,7 +55,7 @@ def get_morphe_patches() -> str:
         filename="morphe-patches.mpp",
         include_prereleases=False
     )
-    return os.path.join("bins", "morphe-patches.rvp")
+    return os.path.join("bins", "morphe-patches.mpp")
 
 
 def add_morphe_patch(version: str) -> str | None:
@@ -69,7 +69,7 @@ def add_morphe_patch(version: str) -> str | None:
         print(f"Warning: {base_apk} not found, skipping morphe repatch")
         return None
 
-    morphe_patches = os.path.join("bins", "morphe-patches.rvp")
+    morphe_patches = os.path.join("bins", "morphe-patches.mpp")
     cli = os.path.join("bins", "morphe-cli.jar")   # already downloaded by download_morphe_cli()
 
     out_apk = f"twitter-piko-morphe-v{version}.apk"
