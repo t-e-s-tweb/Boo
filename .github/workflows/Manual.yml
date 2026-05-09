@@ -40,6 +40,6 @@ jobs:
       - name: Try buildingv
         run: |
           wget https://github.com/monsivamon/twitter-apk/releases/download/11.86.0-release.0/x-piko-v11.86.0-release.0.apk -O piko.apk
-          wget https://github.com/kareemlukitomo/morphe-patches/releases/download/v26.4.30-d38bd3/patches-26.4.30-d38bd3.mpp -O patches.MPP
+          wget https://github.com/kareemlukitomo/morphe-patches/releases/download/v26.4.30-d38bd3/patches-26.4.30-d38bd3.mpp -O patches.mpp
           wget https://github.com/MorpheApp/morphe-cli/releases/download/v1.8.0/morphe-cli-1.8.0-all.jar -O morphe.jar
           java -jar morphe.jar patch piko.apk -p patches.mpp --striplibs=arm64-v8a --unsigned --purge -e='Disable Twitter PairIP startup checks' --exclusive --continue-on-error -f
