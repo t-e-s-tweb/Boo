@@ -39,7 +39,7 @@ jobs:
 
       - name: Try buildingv
         run: |
-          wget https://github.com/monsivamon/twitter-apk/releases/download/11.86.0-release.0/x-piko-v11.86.0-release.0.apk -O piko.apk
+          wget https://www.apkmirror.com/wp-content/themes/APKMirror/download.php?id=13573904&key=9082e9ca5bd4ea8caf96a921ef6cd162e5f80c40 -O piko.apk
           
           #wget https://github.com/kareemlukitomo/morphe-patches/releases/download/v26.4.30-d38bd3/patches-26.4.30-d38bd3.mpp -O patches.mpp
           #wget https://github.com/kareemlukitomo/morphe-patches/releases/download/v26.4.30-d38bd3/patches-26.4.30-d38bd3.mpp
